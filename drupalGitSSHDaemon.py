@@ -24,6 +24,7 @@ SSHSessionProcessProtocol.outConnectionLost = lambda self: None
 import urllib
 import base64
 import hashlib
+import json
 
 from config import config
 from service import Service
@@ -227,7 +228,7 @@ class GitSession(object):
             # The UID is known, populate the environment
             env['VERSION_CONTROL_GIT_UID'] = user["uid"]
             env['VERSION_CONTROL_GIT_REPO_ID'] = repo_id
-            env['VERSION_CONTROL_VCS_AUTH_DATA'] = auth_service
+            env['VERSION_CONTROL_VCS_AUTH_DATA'] = json.dumps(auth_service)
             
         command = ' '.join(argv[:-1] + ["'{0}'".format(repopath)])
         reactor.spawnProcess(proto, sh, (sh, '-c', command), env=env)
