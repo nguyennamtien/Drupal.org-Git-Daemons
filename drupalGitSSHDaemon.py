@@ -155,6 +155,7 @@ class GitSession(object):
         # Map the user
         users = auth_service["users"]
         user = self.map_user(self.user.username, fingerprint, users)
+        execGitCommand = repopath, user, auth_service["repo_id"]
 
         # Check to see if anonymous read access is enabled and if 
         # this is a read
@@ -165,15 +166,15 @@ class GitSession(object):
             # global values - d.o issue #1036686
             # "git":key
             if self.user.username == "git" and user and not user["global"]:
-                return repopath, user, auth_service["repo_id"]
+                return execGitCommand 
             # Username in maintainers list
             elif self.user.username in users and not user["global"]:
                 # username:key
                 if fingerprint in user["ssh_keys"].values():
-                    return repopath, user, auth_service["repo_id"]
+                    return execGitCommand
                 # username:password
                 elif user["pass"] == password:
-                    return repopath, user, auth_service["repo_id"]
+                    return execGitCommand
                 else:
                     # Both kinds of username auth failed
                     error = "Permission denied when accessing '{1}' as user '{2}'".format(argv[-1], self.user.username)
@@ -192,7 +193,7 @@ class GitSession(object):
                 return Failure(ConchError(error))
         else:
             # Read only command and anonymous access is enabled
-            return repopath, user, auth_service["repo_id"]
+            return execGitCommand
 
     def errorHandler(self, fail, proto):
         """Catch any unhandled errors and send the exception string to the remote client."""
