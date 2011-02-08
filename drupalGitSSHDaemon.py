@@ -155,7 +155,7 @@ class GitSession(object):
         # Map the user
         users = auth_service["users"]
         user = self.map_user(self.user.username, fingerprint, users)
-        execGitCommand = repopath, user, auth_service["repo_id"]
+        execGitCommand = repopath, user, auth_service
 
         # Check to see if anonymous read access is enabled and if 
         # this is a read
@@ -218,14 +218,16 @@ class GitSession(object):
 
     def execGitCommand(self, auth_values, argv, proto):
         """After all authentication is done, setup an environment and execute the git-shell commands."""
-        repopath, user, repo_id = auth_values
+        repopath, user, auth_service = auth_values
         sh = self.user.shell
+        repo_id = auth_service["repo_id"]
         
         env = {}
         if user:
             # The UID is known, populate the environment
             env['VERSION_CONTROL_GIT_UID'] = user["uid"]
             env['VERSION_CONTROL_GIT_REPO_ID'] = repo_id
+            env['VERSION_CONTROL_VCS_AUTH_DATA'] = auth_service
             
         command = ' '.join(argv[:-1] + ["'{0}'".format(repopath)])
         reactor.spawnProcess(proto, sh, (sh, '-c', command), env=env)
