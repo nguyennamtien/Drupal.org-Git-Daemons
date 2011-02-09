@@ -2,7 +2,7 @@
 
 Summary:    A TCP server for drupalGitSSHDaemon
 Name:       twisted-drupalGitSSHDaemon
-Version:    0.1
+Version:    0.1.1
 Release:    1
 License:    Unknown
 Group:      Networking/Daemons
@@ -23,10 +23,10 @@ Patched from the "automatically created by tap2rpm" rpm
 mkdir -p "$RPM_BUILD_ROOT"/etc/twisted-taps
 mkdir -p "$RPM_BUILD_ROOT"/etc/init.d
 mkdir -p "$RPM_BUILD_ROOT"/var/lib/twisted-taps
-mkdir -p "$RPM_BUILD_ROOT"%{python_sitelib}
 mkdir -p "$RPM_BUILD_ROOT"/etc/twisted-keys
 cp "drupaldaemons.cnf.default" "$RPM_BUILD_ROOT"/etc/drupaldaemons.cnf
-cp "drupalGitSSHDaemon.py" "$RPM_BUILD_ROOT"%{python_sitelib}
+cp -r "rundir" "$RPM_BUILD_ROOT"/etc/twisted-taps/twisted-drupalGitSSHDaemon
+cp "git-error" "$RPM_BUILD_ROOT"/etc/twisted-taps/twisted-drupalGitSSHDaemon/
 cp "drupalGitSSHDaemon.tac" "$RPM_BUILD_ROOT"/etc/twisted-taps/
 cp "twisted-drupalGitSSHDaemon.init" "$RPM_BUILD_ROOT"/etc/init.d/"twisted-drupalGitSSHDaemon"
 
@@ -48,9 +48,17 @@ cp "twisted-drupalGitSSHDaemon.init" "$RPM_BUILD_ROOT"/etc/init.d/"twisted-drupa
 %attr(0755,root,root) /etc/init.d/twisted-drupalGitSSHDaemon
 %attr(0660,root,root) /etc/twisted-taps/drupalGitSSHDaemon.tac
 %attr(0660,root,root) /etc/drupaldaemons.cnf
-%attr(0660,root,root) %{python_sitelib}/drupalGitSSHDaemon.py
+%attr(0660,root,root) /etc/twisted-taps/twisted-drupalGitSSHDaemon/config.py
+%attr(0660,root,root) /etc/twisted-taps/twisted-drupalGitSSHDaemon/drupalGitSSHDaemon.py
+%attr(0755,root,root) /etc/twisted-taps/twisted-drupalGitSSHDaemon/git-error
+%attr(0660,root,root) /etc/twisted-taps/twisted-drupalGitSSHDaemon/service/__init__.py
+%attr(0660,root,root) /etc/twisted-taps/twisted-drupalGitSSHDaemon/service/protocols.py
 %attr(0660,root,root) /etc/twisted-keys
 
 %changelog
+* Tue Feb 08 2011 Trevor Hardcastle <chizu@spicious.com>
+- Fixes global flags
+- Include the auth data in the git-shell environment
+- Resolve packaging problems related to the use of python submodules
 * Sun Jan 09 2011 Trevor Hardcastle <chizu@spicious.com>
 - Created by tap2rpm: twisted-drupalGitSSHDaemon (0.1)

@@ -7,15 +7,16 @@
 
 PATH=/usr/bin:/bin:/usr/sbin:/sbin
 
-pidfile=/var/run/twisted-drupalGitSSHDaemon-0.1.pid
-rundir=/var/lib/twisted-taps/twisted-drupalGitSSHDaemon-0.1/
+pidfile=/var/run/twisted-drupalGitSSHDaemon.pid
+rundir=/etc/twisted-taps/twisted-drupalGitSSHDaemon
 file=/etc/twisted-taps/drupalGitSSHDaemon.tac
-logfile=/var/log/twisted-drupalGitSSHDaemon-0.1.log
+
+TWISTD_OPTS="--umask 0022"
 
 #  load init function library
 . /etc/init.d/functions
 
-[ -r /etc/default/twisted-drupalGitSSHDaemon-0.1 ] && . /etc/default/twisted-drupalGitSSHDaemon-0.1
+[ -r /etc/default/twisted-drupalGitSSHDaemon ] && . /etc/default/twisted-drupalGitSSHDaemon
 
 #  check for required files
 if [ ! -x /usr/bin/twistd ]
@@ -23,9 +24,9 @@ then
 	echo "$0: Aborting, no /usr/bin/twistd found"
 	exit 0
 fi
-if [ ! -r "$file" ]
+if [ ! -f $file ]
 then
-	echo "$0: Aborting, no file $file found."
+	echo "$0: Aborting, no $file found"
 	exit 0
 fi
 
@@ -36,21 +37,22 @@ then
 fi
 
 
+
 case "$1" in
 	start)
-		echo -n "Starting twisted-drupalGitSSHDaemon-0.1: twistd"
-		daemon twistd  \
-				--pidfile=$pidfile \
-				--rundir=$rundir \
-				--python=$file \
-				--logfile=$logfile
-		status twisted-drupalGitSSHDaemon-0.1
+	        export PYTHONPATH=$rundir
+		echo -n "Starting twisted-drupalGitSSHDaemon: twistd"
+		daemon twistd --pidfile=$pidfile \
+		              --python=$file \
+		              --rundir=$rundir \
+		              $TWISTD_OPTS
+		status twisted-drupalGitSSHDaemon
 		;;
 
 	stop)
-		echo -n "Stopping twisted-drupalGitSSHDaemon-0.1: twistd"
+		echo -n "Stopping twisted-drupalGitSSHDaemon: twistd"
 		kill `cat "${pidfile}"`
-		status twisted-drupalGitSSHDaemon-0.1
+		status twisted-drupalGitSSHDaemon
 		;;
 
 	restart)
