@@ -18,9 +18,13 @@ if auth_protocol == "drush":
 elif auth_protocol == "http":
     # Load http settings
     http_service_url = config.get('http-settings', 'serviceUrl')
-    http_host_header = config.get('http-settings', 'hostHeader')
-    http_auth = b64encode(config.get('http-settings', 'httpAuth'))
-    http_headers = {"Host":http_host_header, "Authorization":"Basic " + http_auth}
+    http_headers = {}
+    if config.has_option('http-settings', 'hostHeader'):
+        http_host_header = config.get('http-settings', 'hostHeader')
+        http_headers["Host"] = http_host_header
+    if config.has_option('http-settings', 'httpAuth'):
+        http_auth = b64encode(config.get('http-settings', 'httpAuth'))
+        http_headers["Authorization"] = "Basic " + http_auth
 else:
     raise Exception("No valid authServiceProtocol specified.")
 
