@@ -2,7 +2,7 @@
 
 Summary:    A TCP server for drupalGitSSHDaemon
 Name:       twisted-drupalGitSSHDaemon
-Version:    0.1.1
+Version:    0.1.2
 Release:    1
 License:    Unknown
 Group:      Networking/Daemons
@@ -56,6 +56,9 @@ cp "twisted-drupalGitSSHDaemon.init" "$RPM_BUILD_ROOT"/etc/init.d/"twisted-drupa
 %attr(0660,root,root) /etc/twisted-keys
 
 %changelog
+* Thu Feb 10 2011 Trevor Hardcastle <chizu@spicious.com>
+- Force git-error to use Python 2.6
+- Allow more flexible http configuration
 * Tue Feb 08 2011 Trevor Hardcastle <chizu@spicious.com>
 - Fixes global flags
 - Include the auth data in the git-shell environment
