@@ -17,7 +17,7 @@ def getSSHService():
 # this is the core part of any tac file, the creation of the root-level
 # application object
 application = service.Application("Drupal SSH Git Server")
-logfile = DailyLogFile("gitssh.log", "/var/log")
+logfile = DailyLogFile("gitssh.log", "/var/log/git")
 application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
 
 # attach the service to its parent application
