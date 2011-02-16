@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+from twisted.internet import epollreactor
+epollreactor.install()
+
 import os
 import shlex
 import sys
