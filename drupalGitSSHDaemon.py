@@ -147,8 +147,13 @@ class GitSession(object):
         # Check permissions by mapping requested path to file system path
         repostring = argv[-1]
         repolist = repostring.split('/')
-        scheme = repolist[1]
-        projectpath = repolist[2:]
+        if repolist[0]:
+            # No leading /
+            scheme = repolist[0]
+            projectpath = repolist[1:]
+        else:
+            scheme = repolist[1]
+            projectpath = repolist[2:]
         repopath = self.user.meta.repopath(scheme, projectpath)
         if not repopath:
             return Failure(ConchError("The remote repository at '{0}' does not exist. Verify that your remote is correct.".format(repostring)))
