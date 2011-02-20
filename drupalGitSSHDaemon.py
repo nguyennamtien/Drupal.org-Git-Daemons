@@ -185,14 +185,21 @@ class GitSession(object):
                     return Failure(ConchError(error))
             else:
                 # Account is globally disabled or disallowed
-                # 0 = ok, 0x02 = suspended, 0x04 = ToS unchecked, 0x01 = no Git user role, but unknown reason (probably a bug!)
-                if user and user["global"] & 0x02:
-                    error = "Your account is suspended."
-                elif user and user["global"] & 0x04:
-                    error = "You are required to accept the Git Access Agreement in your user profile before using git."
-                elif user and user["global"] & 0x01:
-                    error = "You do not have permission to access '{0}' with the provided credentials.".format(argv[-1])
+                # 0x01 = no Git user role, but unknown reason (probably a bug!)
+                # 0x02 = Git account suspended
+                # 0x04 = Git ToS unchecked
+                # 0x08 = Drupal.org account blocked
+                if user["global"] == 0x01:
+                    error = "You do not have permission to access '{0}' with the provided credentials.\n".format(projectname)
+                elif user:
+                    if user["global"] & 0x02:
+                        error = "Your Git access has been suspended.\n"
+                    if user["global"] & 0x04:
+                        error = "You are required to accept the Git Access Agreement in your user profile before using Git.\n"
+                    if user["global"] & 0x08:
+                        error = "Your Drupal.org account has been blocked.\n"
                 else:
+                    # unknown situation, but be safe and error out
                     error = "This operation cannot be completed at this time.  It may be that we are experiencing technical difficulties or are currently undergoing maintenance."
                 return Failure(ConchError(error))
         else:
