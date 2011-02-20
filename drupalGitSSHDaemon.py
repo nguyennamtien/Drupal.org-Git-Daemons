@@ -160,24 +160,32 @@ class GitSession(object):
         repopath = self.user.meta.repopath(scheme, projectpath)
         if not repopath:
             return Failure(ConchError("The remote repository at '{0}' does not exist. Verify that your remote is correct.".format(repostring)))
+        projectname = self.user.meta.projectname(repostring)
 
         # Map the user
         users = auth_service["users"]
         user = self.map_user(self.user.username, fingerprint, users)
         execGitCommand = repopath, user, auth_service
 
-        # Check to see if anonymous read access is enabled and if 
+        # Check to see if anonymous read access is enabled and if
         # this is a read
         if (not self.user.meta.anonymousReadAccess or \
                 'git-upload-pack' not in argv[:-1]):
-            # If anonymous access for this type of command is not allowed, 
+            # First, error out if the project itself is disabled.
+            if not auth_service["status"]:
+                error = "Project {1} has been disabled.".format(projectname)
+                return Failure(ConchError(error))
+            # If anonymous access for this type of command is not allowed,
             # check if the user is a maintainer on this project
             # global values - d.o issue #1036686
             # "git":key
             if self.user.username == "git" and user and not user["global"]:
-                return execGitCommand 
+                return execGitCommand
             # Username in maintainers list
-            elif self.user.username in users and not user["global"]:
+            elif self.user.username not in users:
+                error = "User '{1}' does not have write permissions for repository '{2}'".format(projectname, self.user.username)
+                return Failure(ConchError(error))
+            elif not user["global"]:
                 # username:key
                 if fingerprint in user["ssh_keys"].values():
                     return execGitCommand
@@ -186,18 +194,25 @@ class GitSession(object):
                     return execGitCommand
                 else:
                     # Both kinds of username auth failed
-                    error = "Permission denied when accessing '{1}' as user '{2}'".format(argv[-1], self.user.username)
+                    error = "Permission denied when accessing '{1}' as user '{2}'".format(projectname, self.user.username)
                     return Failure(ConchError(error))
             else:
                 # Account is globally disabled or disallowed
-                # 0 = ok, 0x02 = suspended, 0x04 = ToS unchecked, 0x01 = no Git user role, but unknown reason (probably a bug!)
-                if user and user["global"] & 0x02:
-                    error = "Your account is suspended."
-                elif user and user["global"] & 0x04:
-                    error = "You are required to accept the Git Access Agreement in your user profile before using git."
-                elif user and user["global"] & 0x01:
-                    error = "You do not have permission to access '{0}' with the provided credentials.".format(argv[-1])
+                # 0x01 = no Git user role, but unknown reason (probably a bug!)
+                # 0x02 = Git account suspended
+                # 0x04 = Git ToS unchecked
+                # 0x08 = Drupal.org account blocked
+                if user["global"] == 0x01:
+                    error = "You do not have permission to access '{0}' with the provided credentials.\n".format(projectname)
+                elif user:
+                    if user["global"] & 0x02:
+                        error = "Your Git access has been suspended.\n"
+                    if user["global"] & 0x04:
+                        error = "You are required to accept the Git Access Agreement in your user profile before using Git.\n"
+                    if user["global"] & 0x08:
+                        error = "Your Drupal.org account has been blocked.\n"
                 else:
+                    # unknown situation, but be safe and error out
                     error = "This operation cannot be completed at this time.  It may be that we are experiencing technical difficulties or are currently undergoing maintenance."
                 return Failure(ConchError(error))
         else:
