@@ -152,25 +152,26 @@ class GitSession(object):
         repopath = self.user.meta.repopath(scheme, projectpath)
         if not repopath:
             return Failure(ConchError("The remote repository at '{0}' does not exist. Verify that your remote is correct.".format(repostring)))
+        projectname = self.user.meta.projectname(repostring)
 
         # Map the user
         users = auth_service["users"]
         user = self.map_user(self.user.username, fingerprint, users)
         execGitCommand = repopath, user, auth_service
 
-        # Check to see if anonymous read access is enabled and if 
+        # Check to see if anonymous read access is enabled and if
         # this is a read
         if (not self.user.meta.anonymousReadAccess or \
                 'git-upload-pack' not in argv[:-1]):
-            # If anonymous access for this type of command is not allowed, 
+            # If anonymous access for this type of command is not allowed,
             # check if the user is a maintainer on this project
             # global values - d.o issue #1036686
             # "git":key
             if self.user.username == "git" and user and not user["global"]:
-                return execGitCommand 
+                return execGitCommand
             # Username in maintainers list
             elif self.user.username not in users:
-                return Failure(ConchError("User {1} does not have write permissions for repository {2}".format(repopath, self.user.username)))
+                return Failure(ConchError("User {1} does not have write permissions for repository {2}".format(projectname, self.user.username)))
             elif not user["global"]:
                 # username:key
                 if fingerprint in user["ssh_keys"].values():
@@ -180,7 +181,7 @@ class GitSession(object):
                     return execGitCommand
                 else:
                     # Both kinds of username auth failed
-                    error = "Permission denied when accessing '{1}' as user '{2}'".format(argv[-1], self.user.username)
+                    error = "Permission denied when accessing '{1}' as user '{2}'".format(projectname, self.user.username)
                     return Failure(ConchError(error))
             else:
                 # Account is globally disabled or disallowed
