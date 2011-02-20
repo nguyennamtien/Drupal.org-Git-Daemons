@@ -194,15 +194,16 @@ class GitSession(object):
                 # 0x02 = Git account suspended
                 # 0x04 = Git ToS unchecked
                 # 0x08 = Drupal.org account blocked
-                if user["global"] == 0x01:
+                error = ''
+                if user["global"] & 0x02:
+                    error += "Your Git access has been suspended.\n"
+                if user["global"] & 0x04:
+                    error += "You are required to accept the Git Access Agreement in your user profile before using Git.\n"
+                if user["global"] & 0x08:
+                    error += "Your Drupal.org account has been blocked.\n"
+
+                if not error and user["global"] == 0x01:
                     error = "You do not have permission to access '{0}' with the provided credentials.\n".format(projectname)
-                elif user:
-                    if user["global"] & 0x02:
-                        error = "Your Git access has been suspended.\n"
-                    if user["global"] & 0x04:
-                        error = "You are required to accept the Git Access Agreement in your user profile before using Git.\n"
-                    if user["global"] & 0x08:
-                        error = "Your Drupal.org account has been blocked.\n"
                 else:
                     # unknown situation, but be safe and error out
                     error = "This operation cannot be completed at this time.  It may be that we are experiencing technical difficulties or are currently undergoing maintenance."
