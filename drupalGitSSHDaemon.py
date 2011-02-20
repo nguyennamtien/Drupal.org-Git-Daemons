@@ -169,7 +169,9 @@ class GitSession(object):
             if self.user.username == "git" and user and not user["global"]:
                 return execGitCommand 
             # Username in maintainers list
-            elif self.user.username in users and not user["global"]:
+            elif self.user.username not in users:
+                return Failure(ConchError("User {1} does not have write permissions for repository {2}".format(repopath, self.user.username)))
+            elif not user["global"]:
                 # username:key
                 if fingerprint in user["ssh_keys"].values():
                     return execGitCommand
