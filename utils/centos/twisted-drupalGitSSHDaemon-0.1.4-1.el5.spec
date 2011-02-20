@@ -2,7 +2,7 @@
 
 Summary:    A TCP server for drupalGitSSHDaemon
 Name:       twisted-drupalGitSSHDaemon
-Version:    0.1.3
+Version:    0.1.4
 Release:    1
 License:    Unknown
 Group:      Networking/Daemons
@@ -56,6 +56,8 @@ cp "twisted-drupalGitSSHDaemon.init" "$RPM_BUILD_ROOT"/etc/init.d/"twisted-drupa
 %attr(0660,root,root) /etc/twisted-keys
 
 %changelog
+* Sat Feb 19 2011 Trevor Hardcastle <chizu@spicious.com>
+- Updated error messages (Sam Boyer)
 * Fri Feb 18 2011 Trevor Hardcastle <chizu@spicious.com>
 - Leading slash in project URLs is optional
 - Use epoll instead of select
