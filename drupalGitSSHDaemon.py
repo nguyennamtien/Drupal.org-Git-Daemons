@@ -212,7 +212,7 @@ class GitSession(object):
 
                 if not error and user["global"] == 0x01:
                     error = "You do not have permission to access '{0}' with the provided credentials.\n".format(projectname)
-                else:
+                elif not error:
                     # unknown situation, but be safe and error out
                     error = "This operation cannot be completed at this time.  It may be that we are experiencing technical difficulties or are currently undergoing maintenance."
                 return Failure(ConchError(error))
